@@ -17,9 +17,9 @@ export function mostrarTelaInicial(welcomeScreen, chatContainer, inputContainer,
     welcomeInput.value = '';
     chatInput.value = '';
     conversaAtual = null;
+    atualizarListaConversas(document.querySelector('.chat-list'));
 }
 
-// Função para escapar caracteres HTML
 export function escapeHTML(text) {
     const div = document.createElement('div');
     div.innerText = text;
@@ -62,15 +62,17 @@ export function mostrarCarregamento(chatContainer) {
 export async function enviarMensagem(mensagem, input, chatContainer, sendBtn, stopBtn) {
     if (!mensagem.trim()) return;
 
+    // Previne o comportamento padrão do formulário
+    event.preventDefault();
+
     if (!conversaAtual) {
         iniciarChat(document.querySelector('.welcome-screen'), chatContainer, document.querySelector('.input-container'));
         conversaAtual = {
-            id: Date.now(),
+            id: Date.now().toString(),
             titulo: mensagem.slice(0, 30) + (mensagem.length > 30 ? '...' : ''),
             mensagens: []
         };
         conversas.push(conversaAtual);
-        atualizarListaConversas(document.querySelector('.chat-list'));
     }
 
     input.value = '';
@@ -129,6 +131,7 @@ export async function enviarMensagem(mensagem, input, chatContainer, sendBtn, st
             loadingDiv.remove();
             adicionarMensagem(chatContainer, accumulatedMessage, 'assistant');
             conversaAtual.mensagens.push({ tipo: 'assistant', conteudo: accumulatedMessage });
+            atualizarListaConversas(document.querySelector('.chat-list'));
         } else {
             throw new Error('Resposta inválida do servidor');
         }
@@ -147,6 +150,7 @@ export async function enviarMensagem(mensagem, input, chatContainer, sendBtn, st
         sendBtn.style.display = 'inline';
         stopBtn.style.display = 'none';
         abortController = null;
+        atualizarListaConversas(document.querySelector('.chat-list'));
     }
 }
 
@@ -165,13 +169,14 @@ export function carregarConversa(id) {
     iniciarChat(document.querySelector('.welcome-screen'), chatContainer, document.querySelector('.input-container'));
 
     chatContainer.innerHTML = '';
-
     conversa.mensagens.forEach(msg => {
         adicionarMensagem(chatContainer, msg.conteudo, msg.tipo);
     });
 }
 
 export function atualizarListaConversas(chatList) {
+    if (!chatList) return;
+    
     chatList.innerHTML = '';
     conversas.forEach(conversa => {
         const conversaElement = document.createElement('div');
@@ -180,10 +185,10 @@ export function atualizarListaConversas(chatList) {
         conversaElement.innerHTML = `
             <span>${conversa.titulo}</span>
             <div class="action-buttons">
-                <button class="action-btn" onclick="event.stopPropagation(); renomearConversa(${conversa.id})">
+                <button class="action-btn" onclick="event.stopPropagation(); renomearConversa('${conversa.id}')">
                     <i class="fas fa-edit"></i>
                 </button>
-                <button class="action-btn" onclick="event.stopPropagation(); excluirConversa(${conversa.id})">
+                <button class="action-btn" onclick="event.stopPropagation(); excluirConversa('${conversa.id}')">
                     <i class="fas fa-trash"></i>
                 </button>
             </div>
@@ -192,8 +197,8 @@ export function atualizarListaConversas(chatList) {
     });
 }
 
-export function copiarMensagem(button) {
-    const mensagem = button.closest('.message').textContent.trim();
+window.copiarMensagem = function(button) {
+    const mensagem = button.closest('.message').querySelector('p').textContent.trim();
     navigator.clipboard.writeText(mensagem);
     
     const icon = button.querySelector('i');
@@ -203,11 +208,11 @@ export function copiarMensagem(button) {
     }, 1000);
 }
 
-export function regenerarResposta(button) {
+window.regenerarResposta = function(button) {
     const mensagemElement = button.closest('.message');
     const mensagemAnterior = mensagemElement.previousElementSibling;
     if (mensagemAnterior && mensagemAnterior.classList.contains('user')) {
-        const mensagemUsuario = mensagemAnterior.textContent.trim();
+        const mensagemUsuario = mensagemAnterior.querySelector('p').textContent.trim();
         mensagemElement.remove();
         if (conversaAtual) {
             conversaAtual.mensagens.pop();
@@ -216,7 +221,7 @@ export function regenerarResposta(button) {
     }
 }
 
-export function renomearConversa(id) {
+window.renomearConversa = function(id) {
     const conversa = conversas.find(c => c.id === id);
     if (!conversa) return;
 
@@ -227,7 +232,7 @@ export function renomearConversa(id) {
     }
 }
 
-export function excluirConversa(id) {
+window.excluirConversa = function(id) {
     if (confirm('Tem certeza que deseja excluir esta conversa?')) {
         conversas = conversas.filter(c => c.id !== id);
         if (conversaAtual && conversaAtual.id === id) {
@@ -242,3 +247,14 @@ export function excluirConversa(id) {
         atualizarListaConversas(document.querySelector('.chat-list'));
     }
 }
+
+// Adiciona event listener para o botão "Novo Chat"
+document.querySelector('.new-chat-btn')?.addEventListener('click', () => {
+    mostrarTelaInicial(
+        document.querySelector('.welcome-screen'),
+        document.querySelector('.chat-container'),
+        document.querySelector('.input-container'),
+        document.querySelector('#welcome-input'),
+        document.querySelector('#chat-input')
+    );
+});
