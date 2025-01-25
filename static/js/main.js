@@ -1,71 +1,72 @@
 import './init.js';
-import { 
-    iniciarChat,
-    mostrarTelaInicial,
-    adicionarMensagem
-} from './chat/chatUI.js';
-import {
-    enviarMensagem,
-    interromperResposta
-} from './chat/chatActions.js';
-import {
-    carregarConversa,
-    atualizarListaConversas,
-    copiarMensagem,
-    regenerarResposta,
-    renomearConversa,
-    excluirConversa
-} from './chat/chatStorage.js';
+import { configureEventListeners } from './events.js';
 
 // Estado global
 window.currentModel = 'gemma2:2b';
 window.conversas = [];
 window.conversaAtual = null;
+window.abortController = null;
 
-// Configurar eventos dos formulários
 document.addEventListener('DOMContentLoaded', () => {
-    const welcomeForm = document.getElementById('welcome-form');
-    const chatForm = document.getElementById('chat-form');
-    const chatContainer = document.querySelector('.chat-container');
-    const welcomeInput = document.getElementById('welcome-input');
-    const chatInput = document.getElementById('chat-input');
-    const sendBtn = document.getElementById('send-btn');
-    const stopBtn = document.getElementById('stop-btn');
-
-    welcomeForm?.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const message = welcomeInput.value.trim();
-        if (!message) return;
-
-        iniciarChat(
-            document.querySelector('.welcome-screen'),
-            chatContainer,
-            document.querySelector('.input-container')
-        );
-
-        adicionarMensagem(chatContainer, message, 'user');
-        await enviarMensagem(message, welcomeInput, chatContainer, sendBtn, stopBtn);
-    });
-
-    chatForm?.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const message = chatInput.value.trim();
-        if (!message) return;
-
-        adicionarMensagem(chatContainer, message, 'user');
-        await enviarMensagem(message, chatInput, chatContainer, sendBtn, stopBtn);
-    });
+    configureEventListeners();
+    
+    // Carregar conversas do servidor
+    fetch('/get_conversation_history')
+        .then(response => response.json())
+        .then(conversations => {
+            window.conversas = conversations;
+            atualizarListaConversas();
+        })
+        .catch(error => console.error('Erro ao carregar conversas:', error));
 });
 
-// Expor funções globalmente para uso em eventos inline
-window.iniciarChat = iniciarChat;
-window.mostrarTelaInicial = mostrarTelaInicial;
-window.adicionarMensagem = adicionarMensagem;
-window.enviarMensagem = enviarMensagem;
-window.interromperResposta = interromperResposta;
+// Funções de gerenciamento de chat
+export function iniciarNovoChat() {
+    window.conversaAtual = null;
+    mostrarTelaInicial();
+}
+
+export function carregarConversa(id) {
+    fetch(`/get_conversation/${id}`)
+        .then(response => response.json())
+        .then(conversa => {
+            if (conversa) {
+                window.conversaAtual = conversa;
+                iniciarChat();
+                const chatContainer = document.querySelector('.chat-container');
+                chatContainer.innerHTML = '';
+                conversa.messages.forEach(msg => {
+                    adicionarMensagem(msg.content, msg.role);
+                });
+            }
+        })
+        .catch(error => console.error('Erro ao carregar conversa:', error));
+}
+
+export function atualizarListaConversas() {
+    const chatList = document.querySelector('.chat-list');
+    chatList.innerHTML = '';
+    
+    window.conversas.forEach(conversa => {
+        const conversaElement = document.createElement('div');
+        conversaElement.className = 'chat-item';
+        conversaElement.onclick = () => carregarConversa(conversa.id);
+        conversaElement.innerHTML = `
+            <span>${conversa.title}</span>
+            <div class="action-buttons">
+                <button class="action-btn" onclick="event.stopPropagation(); renomearConversa('${conversa.id}')">
+                    <i class="fas fa-edit"></i>
+                </button>
+                <button class="action-btn" onclick="event.stopPropagation(); excluirConversa('${conversa.id}')">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        `;
+        chatList.appendChild(conversaElement);
+    });
+}
+
+// Expor funções globalmente
+window.iniciarNovoChat = iniciarNovoChat;
 window.carregarConversa = carregarConversa;
 window.atualizarListaConversas = atualizarListaConversas;
-window.copiarMensagem = copiarMensagem;
-window.regenerarResposta = regenerarResposta;
-window.renomearConversa = renomearConversa;
-window.excluirConversa = excluirConversa;
