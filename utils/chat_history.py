@@ -14,46 +14,71 @@ def get_conversation_history():
             with open(HISTORY_FILE, 'r', encoding='utf-8') as f:
                 return json.load(f)
         return []
+    except json.JSONDecodeError as e:
+        print(f"Erro ao carregar histórico: {str(e)}")
+        return []  # Retorna uma lista vazia em caso de erro
     except Exception as e:
         print(f"Erro ao carregar histórico: {str(e)}")
-        return []
+        return []  # Retorna uma lista vazia em caso de erro
 
 def get_conversation_by_id(conversation_id):
+    """Busca uma conversa específica pelo ID"""
     conversations = get_conversation_history()
-    return next((conv for conv in conversations if str(conv['id']) == str(conversation_id)), None)
-
+    for conversation in conversations:
+        if conversation['id'] == conversation_id:
+            return conversation
+    return None
+  
 def save_conversation(message, response, conversation_id=None):
+    """
+    Salva ou atualiza uma conversa no histórico.
+    Se conversation_id for fornecido, atualiza a conversa existente.
+    Caso contrário, cria uma nova conversa.
+    """
     ensure_data_directory()
     try:
+        # Carrega o histórico atual
         conversations = get_conversation_history()
-        timestamp = datetime.now().isoformat()
         
         if conversation_id:
             # Atualiza conversa existente
-            for conv in conversations:
-                if str(conv['id']) == str(conversation_id):
-                    conv['messages'].extend([
+            updated = False
+            for conversation in conversations:
+                if conversation['id'] == conversation_id:
+                    conversation['messages'].extend([
                         {'role': 'user', 'content': message},
                         {'role': 'assistant', 'content': response}
                     ])
-                    conv['timestamp'] = timestamp
+                    conversation['timestamp'] = datetime.now().isoformat()
+                    updated = True
                     break
+            
+            # Se não encontrou o ID, cria uma nova conversa (backup seguro)
+            if not updated:
+                conversation_id = str(len(conversations) + 1)
+                new_conversation = {
+                    'id': conversation_id,
+                    'timestamp': datetime.now().isoformat(),
+                    'messages': [
+                        {'role': 'user', 'content': message},
+                        {'role': 'assistant', 'content': response}
+                    ]
+                }
+                conversations.append(new_conversation)
         else:
             # Cria nova conversa
-            new_id = str(len(conversations) + 1)
+            conversation_id = str(len(conversations) + 1)
             new_conversation = {
-                'id': new_id,
-                'timestamp': timestamp,
-                'title': message[:30] + ('...' if len(message) > 30 else ''),
+                'id': conversation_id,
+                'timestamp': datetime.now().isoformat(),
                 'messages': [
                     {'role': 'user', 'content': message},
                     {'role': 'assistant', 'content': response}
                 ]
             }
             conversations.append(new_conversation)
-            conversation_id = new_id
-
-        # Salva todas as conversas
+        
+        # Salva as conversas atualizadas
         with open(HISTORY_FILE, 'w', encoding='utf-8') as f:
             json.dump(conversations, f, ensure_ascii=False, indent=2)
         
@@ -61,3 +86,4 @@ def save_conversation(message, response, conversation_id=None):
     except Exception as e:
         print(f"Erro ao salvar conversa: {str(e)}")
         return None
+ 

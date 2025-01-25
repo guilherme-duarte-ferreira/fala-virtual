@@ -3,7 +3,7 @@ import json
 from datetime import datetime
 import requests
 from utils.text_processor import split_text
-from utils.chat_history import save_conversation, get_conversation_history, get_conversation_by_id
+from utils.chat_history import save_conversation, get_conversation_history
 
 app = Flask(__name__)
 app.secret_key = 'sua_chave_secreta_aqui'
@@ -17,11 +17,6 @@ def home():
     if not conversations:
         conversations = []
     return render_template('index.html', conversations=conversations)
-
-@app.route('/get_conversation_history')
-def get_history():
-    conversations = get_conversation_history()
-    return jsonify(conversations if conversations else [])
 
 @app.route('/get_conversation/<conversation_id>')
 def get_conversation(conversation_id):
@@ -44,23 +39,23 @@ def send_message():
             responses.append(response)
         final_response = " ".join(responses)
     else:
-        final_response = None
+        final_response = None  # Streaming será usado para mensagens menores
 
     def generate_streamed_response():
-        accumulated_response = ""
         for part in process_with_ai_stream(message):
-            accumulated_response += part
             yield f"data: {json.dumps({'content': part})}\n\n"
-        
-        if not conversation_id:
-            conversation_id = save_conversation(message, accumulated_response)
-        else:
-            save_conversation(message, accumulated_response, conversation_id)
-        
-        yield f"data: {json.dumps({'conversation_id': conversation_id})}\n\n"
 
+    # Configura streaming para mensagens
     response = Response(generate_streamed_response(), content_type="text/event-stream")
     response.headers['Cache-Control'] = 'no-cache'
+
+    # Atualizar o histórico após streaming
+    if final_response is not None:
+        if not conversation_id:
+            conversation_id = save_conversation(message, final_response)
+        else:
+            save_conversation(message, final_response, conversation_id)
+
     return response
 
 def process_with_ai(text):
@@ -81,9 +76,12 @@ def process_with_ai(text):
         if 'choices' in response_data and len(response_data['choices']) > 0:
             return response_data['choices'][0]['message']['content']
         return "Erro: Nenhuma resposta válida recebida da IA."
+    except requests.exceptions.RequestException as e:
+        print(f"[Debug] Erro na requisição HTTP: {str(e)}")
+        return "Ocorreu um erro ao se conectar com a IA."
     except Exception as e:
-        print(f"[Debug] Erro: {str(e)}")
-        return "Ocorreu um erro ao processar sua mensagem."
+        print(f"[Debug] Erro inesperado: {str(e)}")
+        return "Ocorreu um erro inesperado ao processar sua mensagem."
 
 def process_with_ai_stream(text):
     try:
@@ -111,8 +109,10 @@ def process_with_ai_stream(text):
                             yield content
                 except json.JSONDecodeError:
                     print(f"[Debug] Erro ao decodificar JSON: {line}")
+    except requests.exceptions.RequestException as e:
+        print(f"[Debug] Erro na requisição HTTP: {str(e)}")
     except Exception as e:
-        print(f"[Debug] Erro: {str(e)}")
+        print(f"[Debug] Erro inesperado: {str(e)}")
 
 if __name__ == '__main__':
     app.run(debug=True)
