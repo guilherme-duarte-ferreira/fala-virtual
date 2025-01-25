@@ -18,6 +18,11 @@ def home():
         conversations = []
     return render_template('index.html', conversations=conversations)
 
+@app.route('/get_conversation_history')
+def get_history():
+    conversations = get_conversation_history()
+    return jsonify(conversations if conversations else [])
+
 @app.route('/get_conversation/<conversation_id>')
 def get_conversation(conversation_id):
     conversation = get_conversation_by_id(conversation_id)
@@ -39,7 +44,7 @@ def send_message():
             responses.append(response)
         final_response = " ".join(responses)
     else:
-        final_response = None  # Streaming será usado para mensagens menores
+        final_response = None
 
     def generate_streamed_response():
         accumulated_response = ""
@@ -47,11 +52,12 @@ def send_message():
             accumulated_response += part
             yield f"data: {json.dumps({'content': part})}\n\n"
         
-        # Salvar a conversa após o streaming completo
         if not conversation_id:
             conversation_id = save_conversation(message, accumulated_response)
         else:
             save_conversation(message, accumulated_response, conversation_id)
+        
+        yield f"data: {json.dumps({'conversation_id': conversation_id})}\n\n"
 
     response = Response(generate_streamed_response(), content_type="text/event-stream")
     response.headers['Cache-Control'] = 'no-cache'
