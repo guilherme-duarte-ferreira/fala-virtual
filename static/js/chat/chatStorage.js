@@ -1,3 +1,5 @@
+import { adicionarMensagem } from './chatUI.js';
+
 export function carregarConversa(id) {
     const conversa = window.conversas.find(c => c.id === id);
     if (!conversa) return;
