@@ -1,3 +1,7 @@
+import { mostrarCarregamento } from './chatUI.js';
+import { adicionarMensagem } from './chatUI.js';
+import { adicionarMensagemAoHistorico } from './chatStorage.js';
+
 let abortController = null;
 
 export async function enviarMensagem(mensagem, input, chatContainer, sendBtn, stopBtn) {
