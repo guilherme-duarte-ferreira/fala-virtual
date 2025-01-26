@@ -1,7 +1,3 @@
-// Estado global do chat
-window.conversas = [];
-window.conversaAtual = null;
-
 export function carregarConversa(id) {
     const conversa = window.conversas.find(c => c.id === id);
     if (!conversa) return;
@@ -51,24 +47,6 @@ export function atualizarListaConversas() {
         `;
         chatList.appendChild(conversaElement);
     });
-
-    // Configurar pesquisa
-    const searchInput = document.querySelector('#search-input');
-    if (searchInput) {
-        searchInput.addEventListener('input', (e) => {
-            const searchTerm = e.target.value.toLowerCase();
-            const chatItems = chatList.querySelectorAll('.chat-item');
-            
-            chatItems.forEach(item => {
-                const titulo = item.querySelector('span').textContent.toLowerCase();
-                if (titulo.includes(searchTerm)) {
-                    item.style.display = 'flex';
-                } else {
-                    item.style.display = 'none';
-                }
-            });
-        });
-    }
 }
 
 export function criarNovaConversa() {
@@ -81,19 +59,6 @@ export function criarNovaConversa() {
     window.conversas.unshift(novaConversa);
     window.conversaAtual = null;
     atualizarListaConversas();
-    
-    const welcomeScreen = document.querySelector('.welcome-screen');
-    const chatContainer = document.querySelector('.chat-container');
-    const inputContainer = document.querySelector('.input-container');
-    
-    welcomeScreen.style.display = 'flex';
-    chatContainer.style.display = 'none';
-    inputContainer.style.display = 'none';
-    chatContainer.innerHTML = '';
-
-    // Limpar inputs
-    document.querySelector('#welcome-input').value = '';
-    document.querySelector('#chat-input').value = '';
 }
 
 export function adicionarMensagemAoHistorico(mensagem, tipo) {
@@ -147,24 +112,4 @@ export function excluirConversa(id) {
     }
     
     atualizarListaConversas();
-}
-
-function adicionarMensagem(chatContainer, texto, tipo) {
-    const mensagemDiv = document.createElement('div');
-    mensagemDiv.className = `message ${tipo}`;
-    mensagemDiv.innerHTML = `
-        <p>${texto.replace(/\n/g, '<br>')}</p>
-        <div class="message-actions">
-            <button class="action-btn" onclick="copiarMensagem(this)">
-                <i class="fas fa-copy"></i>
-            </button>
-            ${tipo === 'assistant' ? `
-                <button class="action-btn" onclick="regenerarResposta(this)">
-                    <i class="fas fa-redo"></i>
-                </button>
-            ` : ''}
-        </div>
-    `;
-    chatContainer.appendChild(mensagemDiv);
-    chatContainer.scrollTop = chatContainer.scrollHeight;
 }

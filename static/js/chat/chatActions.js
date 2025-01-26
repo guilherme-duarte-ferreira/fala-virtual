@@ -1,6 +1,3 @@
-import { adicionarMensagem } from './chatUI.js';
-import { adicionarMensagemAoHistorico } from './chatStorage.js';
-
 let abortController = null;
 
 export async function enviarMensagem(mensagem, input, chatContainer, sendBtn, stopBtn) {
@@ -86,17 +83,4 @@ export function interromperResposta() {
     if (abortController) {
         abortController.abort();
     }
-}
-
-function mostrarCarregamento(chatContainer) {
-    const loadingDiv = document.createElement('div');
-    loadingDiv.className = 'loading message assistant';
-    loadingDiv.innerHTML = `
-        <span></span>
-        <span></span>
-        <span></span>
-    `;
-    chatContainer.appendChild(loadingDiv);
-    chatContainer.scrollTop = chatContainer.scrollHeight;
-    return loadingDiv;
 }

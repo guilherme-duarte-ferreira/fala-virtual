@@ -1,5 +1,3 @@
-import { escapeHTML } from './chatUtils.js';
-
 export function iniciarChat(welcomeScreen, chatContainer, inputContainer) {
     welcomeScreen.style.display = 'none';
     chatContainer.style.display = 'block';
