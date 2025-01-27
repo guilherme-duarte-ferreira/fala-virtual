@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Configurar botão de nova conversa
     newChatBtn?.addEventListener('click', () => {
-        criarNovaConversa();
+        window.conversaAtual = null;
         mostrarTelaInicial(
             document.querySelector('.welcome-screen'),
             chatContainer,
@@ -54,6 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
             };
             window.conversas.unshift(novaConversa);
             window.conversaAtual = novaConversa;
+            atualizarListaConversas();
         }
 
         iniciarChat(
@@ -77,6 +78,11 @@ document.addEventListener('DOMContentLoaded', () => {
         adicionarMensagemAoHistorico(message, 'user');
         
         await enviarMensagem(message, chatInput, chatContainer, sendBtn, stopBtn);
+    });
+
+    // Configurar botão de parar resposta
+    stopBtn?.addEventListener('click', () => {
+        interromperResposta();
     });
 
     // Inicializar lista de conversas

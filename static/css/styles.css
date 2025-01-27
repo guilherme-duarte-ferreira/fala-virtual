@@ -257,22 +257,22 @@ body {
     display: flex;
     gap: 1rem;
     width: 100%;
-    max-width: 600px;
+    max-width: 800px;  /* Aumentado de 600px para 800px */
     margin-bottom: 2rem;
     position: relative;
 }
 
 .input-box textarea {
     width: 100%;
-    padding: 0.75rem;
-    padding-right: 2.5rem;
+    padding: 1rem;  /* Aumentado de 0.75rem para 1rem */
+    padding-right: 3.5rem;  /* Aumentado para dar mais espaço ao botão */
     border: 1px solid var(--border-color);
     border-radius: 0.5rem;
     background-color: var(--input-bg);
     color: var(--text-primary);
     font-size: 1rem;
     resize: none;
-    min-height: 44px;
+    min-height: 56px;  /* Aumentado de 44px para 56px */
     max-height: 200px;
     line-height: 1.5;
     scrollbar-width: none;
@@ -283,10 +283,11 @@ body {
     display: none;
 }
 
-.input-box .send-btn {
+.input-box .send-btn,
+.input-box .stop-btn {
     position: absolute;
-    right: 0.5rem;
-    bottom: 0.5rem;
+    right: 0.75rem;
+    bottom: 0.75rem;
     background: transparent;
     border: none;
     color: var(--text-primary);
@@ -294,9 +295,13 @@ body {
     padding: 0.5rem;
     border-radius: 4px;
     transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-.input-box .send-btn:hover {
+.input-box .send-btn:hover,
+.input-box .stop-btn:hover {
     background-color: var(--action-hover);
 }
 

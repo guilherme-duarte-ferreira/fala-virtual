@@ -14,7 +14,7 @@ export async function enviarMensagem(mensagem, input, chatContainer, sendBtn, st
     let accumulatedMessage = '';
 
     sendBtn.style.display = 'none';
-    stopBtn.style.display = 'inline';
+    stopBtn.style.display = 'flex';
 
     abortController = new AbortController();
 
@@ -68,16 +68,20 @@ export async function enviarMensagem(mensagem, input, chatContainer, sendBtn, st
     } catch (erro) {
         if (erro.name === 'AbortError') {
             console.log('Geração de resposta interrompida pelo usuário');
-            adicionarMensagem(chatContainer, accumulatedMessage, 'assistant');
-            adicionarMensagemAoHistorico(accumulatedMessage, 'assistant');
+            loadingDiv.remove();
+            if (accumulatedMessage) {
+                adicionarMensagem(chatContainer, accumulatedMessage, 'assistant');
+                adicionarMensagemAoHistorico(accumulatedMessage, 'assistant');
+            }
         } else {
             console.error('Erro:', erro);
+            loadingDiv.remove();
             const mensagemErro = 'Erro ao conectar com o servidor. Por favor, tente novamente.';
             adicionarMensagem(chatContainer, mensagemErro, 'assistant');
             adicionarMensagemAoHistorico(mensagemErro, 'assistant');
         }
     } finally {
-        sendBtn.style.display = 'inline';
+        sendBtn.style.display = 'flex';
         stopBtn.style.display = 'none';
         abortController = null;
     }
