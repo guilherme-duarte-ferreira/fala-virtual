@@ -255,10 +255,10 @@ body {
 
 .input-box {
     display: flex;
-    gap: 1rem;
+    flex-direction: column;
+    gap: 0.75rem;
     width: 100%;
     max-width: 800px;  /* Aumentado de 600px para 800px */
-    margin-bottom: 2rem;
     position: relative;
 }
 
@@ -283,11 +283,26 @@ body {
     display: none;
 }
 
-.input-box .send-btn,
-.input-box .stop-btn {
-    position: absolute;
-    right: 0.75rem;
-    bottom: 0.75rem;
+.input-container {
+    padding: 1.5rem;
+    border-top: 1px solid var(--border-color);
+    max-width: 800px;
+    margin: 0 auto;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.button-container {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    padding: 0 0.5rem;
+}
+
+.send-btn,
+.stop-btn {
     background: transparent;
     border: none;
     color: var(--text-primary);
@@ -300,26 +315,8 @@ body {
     justify-content: center;
 }
 
-.input-box .send-btn:hover,
-.input-box .stop-btn:hover {
-    background-color: var(--action-hover);
-}
-
-/* Estilo do botão de Stop */
-.input-box .stop-btn {
-    position: absolute;
-    right: 5rem; /* Ajuste a posição conforme necessário */
-    bottom: 0.5rem;
-    background: transparent;
-    border: none;
-    color: var(--text-primary);
-    cursor: pointer;
-    padding: 0.5rem;
-    border-radius: 4px;
-    transition: all 0.2s;
-}
-
-.input-box .stop-btn:hover {
+.send-btn:hover,
+.stop-btn:hover {
     background-color: var(--action-hover);
 }
 
@@ -412,13 +409,25 @@ body {
     color: var(--text-primary);
 }
 
-/* Input Container */
-.input-container {
-    padding: 1.5rem;
-    border-top: 1px solid var(--border-color);
-    max-width: 800px;
-    margin: 0 auto;
-    width: 100%;
+.message .versions-container {
+    margin-top: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.message .version-toggle {
+    background: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 0.5rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.message .version-toggle:hover {
+    background-color: var(--action-hover);
 }
 
 /* Loading Animation */
