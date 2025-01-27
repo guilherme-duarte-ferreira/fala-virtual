@@ -82,14 +82,46 @@
             <!-- Container de Input -->
             <div class="input-container" style="display: none;">
                 <form class="input-box" id="chat-form">
-                    <textarea id="chat-input" placeholder="Digite sua mensagem..." rows="1"></textarea>
-                    <div class="button-container">
-                        <button type="button" class="stop-btn" id="stop-btn" style="display: none;">
-                            <i class="fas fa-stop"></i>
-                        </button>
-                        <button type="submit" class="send-btn" id="send-btn">
-                            <i class="fas fa-paper-plane"></i>
-                        </button>
+                    <textarea id="chat-input" placeholder="Mensagem IA ou @mencionar agente" rows="1"></textarea>
+                    <div class="button-group">
+                        <div class="icon-buttons">
+                            <button type="button" aria-label="Pesquisa na Web">
+                                <i class="fas fa-globe"></i>
+                                <span>Pesquisa na Web</span>
+                            </button>
+                            <button type="button" aria-label="Raciocínio">
+                                <i class="fas fa-brain"></i>
+                                <span>Raciocínio</span>
+                            </button>
+                            <button type="button" aria-label="Modelos">
+                                <i class="fas fa-cogs"></i>
+                                <span>Modelos</span>
+                            </button>
+                            <button type="button" aria-label="Visualização de Dados">
+                                <i class="fas fa-chart-bar"></i>
+                                <span>Visualização de Dados</span>
+                            </button>
+                            <button type="button" aria-label="Domínio">
+                                <i class="fas fa-globe-americas"></i>
+                                <span>Domínio</span>
+                            </button>
+                            <button type="button" aria-label="Carregar">
+                                <i class="fas fa-paperclip"></i>
+                                <span>Carregar</span>
+                            </button>
+                            <button type="button" aria-label="Personalizar">
+                                <i class="fas fa-sliders-h"></i>
+                                <span>Personalizar</span>
+                            </button>
+                        </div>
+                        <div class="action-buttons">
+                            <button type="button" class="stop-btn" id="stop-btn" style="display: none;">
+                                <i class="fas fa-stop"></i>
+                            </button>
+                            <button type="submit" class="send-btn" id="send-btn">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
                     </div>
                 </form>
             </div>
